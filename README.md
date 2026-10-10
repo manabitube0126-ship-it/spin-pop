@@ -3,6 +3,7 @@
 
 
 - ▶ **Try it:** https://manabitube0126-ship-it.github.io/spin-pop/
+- 🎬 **Demo video:** https://manabitube0126-ship-it.github.io/spin-pop/demo.mp4
 
 ## About
 
