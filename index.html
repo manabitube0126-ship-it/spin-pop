@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:; base-uri 'none'; form-action 'none'">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spin Pop</title>
+<style>
+:root{--pink:#e0457b;--pink-d:#b02f5c;--bg:#fff8e1;--yellow:#ffc75f;--ink:#4a2340;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;color:var(--ink);background:var(--bg);background-image:radial-gradient(#ffe3a3 2px,transparent 2.5px);background-size:26px 26px}
+button,input{font-family:inherit}
+:focus-visible{outline:3px solid #5ec2ff;outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;max-width:980px;margin:0 auto}
+.logo{font-size:22px;font-weight:900;color:var(--pink);letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.logo small{display:block;font-size:11px;font-weight:600;color:var(--ink);opacity:.75;letter-spacing:0}
+.lang{display:flex;background:#fff;border:2px solid var(--yellow);border-radius:20px;padding:2px}
+.lang button{border:0;background:transparent;border-radius:16px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--pink);color:#fff}
+main{max-width:980px;margin:0 auto;padding:4px 16px 40px;display:grid;gap:18px}
+@media(min-width:820px){main{grid-template-columns:1fr 1fr;align-items:start}}
+.card{background:var(--card);border-radius:28px;padding:18px;box-shadow:0 6px 0 #ffd98a;border:3px solid #fff}
+h2{font-size:16px;margin:0 0 10px;color:var(--pink)}
+.stage{text-align:center;position:relative}
+.sub{font-size:14px;margin:0 0 6px;font-weight:700}
+.wheelbox{position:relative;width:min(100%,340px);margin:14px auto 0;aspect-ratio:1}
+.pointer{position:absolute;left:50%;top:-12px;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:32px solid var(--pink);z-index:3;filter:drop-shadow(0 3px 0 rgba(0,0,0,.18))}
+.wheelbox svg{width:100%;height:100%;display:block;border-radius:50%;border:7px solid #fff;box-shadow:0 7px 0 #ffb3c7;background:#fff}
+#wheelG{transform-origin:150px 150px}
+.hub{position:absolute;left:50%;top:50%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;border:5px solid #fff;background:var(--pink);color:#fff;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--pink-d);z-index:2}
+.hub:disabled{opacity:.85;cursor:default}
+.spin{margin:20px auto 0;display:block;background:var(--pink);color:#fff;border:0;border-radius:30px;padding:14px 0;width:min(100%,240px);font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 6px 0 var(--pink-d);transition:transform .1s,box-shadow .1s}
+.spin:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 var(--pink-d)}
+.spin:disabled{background:#d88aa8;box-shadow:0 6px 0 #b9708c;cursor:default}
+.result{min-height:84px;margin-top:16px;border-radius:22px;background:#fff3f7;border:3px dashed #ffb3c7;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.result .lbl{font-size:13px;font-weight:700;opacity:.8}
+.result .win{font-size:28px;font-weight:900;color:var(--pink);word-break:break-word;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tab{border:2px solid var(--yellow);background:#fff;color:var(--ink);border-radius:18px;padding:7px 12px;font-size:14px;font-weight:700;cursor:pointer}
+.tab[aria-pressed=true]{background:var(--pink);border-color:var(--pink);color:#fff;box-shadow:0 3px 0 var(--pink-d)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:44px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:2px solid var(--yellow);color:var(--pink);border-radius:20px;padding:4px 6px 4px 12px;font-size:15px;font-weight:700;animation:pop .3s}
+.chip button{border:0;background:#ffe6ee;color:var(--pink);width:24px;height:24px;border-radius:50%;cursor:pointer;font-weight:900;line-height:1}
+.chip button:hover{background:var(--pink);color:#fff}
+.addrow{display:flex;gap:8px;margin-top:12px}
+.addrow input{flex:1;min-width:0;border:2px solid var(--yellow);border-radius:20px;padding:10px 14px;font-size:16px;color:var(--ink);background:#fffdf5}
+.btn{border:0;border-radius:20px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;background:#6bd6a8;color:#12432e;box-shadow:0 4px 0 #3fa97c}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #3fa97c}
+.btn.ghost{background:#fff;color:var(--pink);box-shadow:none;border:2px solid #ffb3c7;padding:6px 12px;font-size:13px}
+.msg{min-height:20px;margin:8px 2px 0;font-size:13px;font-weight:700;color:var(--pink-d)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.hist li{display:flex;justify-content:space-between;gap:8px;background:#f4fbff;border-radius:14px;padding:7px 12px;font-size:14px}
+.hist li b{color:var(--ink)}.hist li span{opacity:.65;font-size:12px;white-space:nowrap}
+.empty{font-size:13px;opacity:.7}
+.hhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.hhead h2{margin:0}
+.side{display:grid;gap:18px}
+.conf{position:fixed;top:-30px;font-size:26px;pointer-events:none;z-index:50;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.9}}
+@media(prefers-reduced-motion:reduce){.conf{display:none}.chip,.result .win{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span aria-hidden="true">🎡</span><div>Spin Pop<small data-i18n="tagline"></small></div></div>
+  <div class="lang" data-demo="lang-switch" role="group" aria-label="Language">
+    <button type="button" data-lang="ja" data-demo="lang-ja">日本語</button>
+    <button type="button" data-lang="en" data-demo="lang-en">EN</button>
+  </div>
+</header>
+<main>
+  <section class="card stage" aria-labelledby="stTitle">
+    <h2 id="stTitle" data-i18n="whatToday"></h2>
+    <p class="sub" id="tplName"></p>
+    <div class="wheelbox">
+      <div class="pointer" aria-hidden="true"></div>
+      <svg viewBox="0 0 300 300" role="img" id="wheelSvg" data-demo="wheel"><g id="wheelG"></g></svg>
+      <button class="hub" type="button" id="hub" data-demo="wheel-hub" data-i18n="go"></button>
+    </div>
+    <button class="spin" type="button" id="spinBtn" data-demo="spin-button" data-i18n="spin"></button>
+    <div class="result" id="result" data-demo="result" aria-live="polite"></div>
+  </section>
+
+  <div class="side">
+    <section class="card" aria-labelledby="edTitle">
+      <h2 id="edTitle" data-i18n="templates"></h2>
+      <div class="tabs" id="tabs"></div>
+      <h2 data-i18n="options"></h2>
+      <div class="chips" id="chips" data-demo="options-list"></div>
+      <form class="addrow" id="addForm">
+        <input type="text" id="addInput" maxlength="24" data-demo="add-input" data-i18n-ph="placeholder" data-i18n-aria="addAria" autocomplete="off">
+        <button class="btn" type="submit" data-demo="add-button" data-i18n="add"></button>
+      </form>
+      <div class="msg" id="msg" role="status"></div>
+      <div class="tools"><button class="btn ghost" type="button" id="resetBtn" data-demo="reset-template" data-i18n="reset"></button></div>
+    </section>
+
+    <section class="card" aria-labelledby="hiTitle">
+      <div class="hhead"><h2 id="hiTitle" data-i18n="history"></h2><button class="btn ghost" type="button" id="clearHist" data-demo="clear-history" data-i18n="clear"></button></div>
+      <ul class="hist" id="hist" data-demo="history"></ul>
+    </section>
+  </div>
+</main>
+
+<script>
+const I18N={
+ja:{
+ title:"Spin Pop｜なんでも決めるルーレット",tagline:"どんな迷いも、一瞬で決めよう",
+ whatToday:"どれにする？",go:"GO!",spin:"まわす！",spinning:"まわり中…",
+ templates:"テンプレを選ぶ",options:"候補（タップで消せるよ）",placeholder:"候補を入れてね（例：うどん）",addAria:"新しい候補",add:"＋ 追加",
+ reset:"テンプレに戻す",history:"さっきの結果",clear:"けす",noHist:"まだありません。まわしてみよう！",
+ resultLbl:"🎉 けってい！",resultEmpty:"「まわす！」をおしてね",
+ min:"候補は2つ以上ひつようです",max:"候補は12個までです",dup:"もう入っています",blank:"文字を入れてね",
+ added:"追加しました！",removed:"消しました",resetDone:"テンプレに戻しました",
+ remove:"を消す",wheelAria:"候補のルーレット",now:"いま",
+ t_lunch:"🍜 ランチ",t_weekend:"🎬 休日",t_movie:"🍿 映画",t_snack:"🎁 おやつ",t_outfit:"👕 きょうの服",t_yesno:"⭕ はい/いいえ",t_custom:"✏️ じぶんで",
+ n_lunch:"今日のランチ",n_weekend:"休日の過ごし方",n_movie:"見る映画のジャンル",n_snack:"今日のおやつ",n_outfit:"きょうの服",n_yesno:"はい？ いいえ？",n_custom:"じぶんで作るルーレット"
+},
+en:{
+ title:"Spin Pop | Roulette for Any Choice",tagline:"Settle any small choice in a flash",
+ whatToday:"What will it be?",go:"GO!",spin:"Spin!",spinning:"Spinning…",
+ templates:"Pick a template",options:"Options (tap ✕ to remove)",placeholder:"Type an option (e.g. Udon)",addAria:"New option",add:"+ Add",
+ reset:"Reset template",history:"Recent results",clear:"Clear",noHist:"Nothing yet. Give it a spin!",
+ resultLbl:"🎉 Decided!",resultEmpty:"Press “Spin!”",
+ min:"You need at least 2 options",max:"Up to 12 options",dup:"Already in the list",blank:"Type something first",
+ added:"Added!",removed:"Removed",resetDone:"Template restored",
+ remove:": remove",wheelAria:"Roulette wheel of options",now:"now",
+ t_lunch:"🍜 Lunch",t_weekend:"🎬 Weekend",t_movie:"🍿 Movie",t_snack:"🎁 Snack",t_outfit:"👕 Outfit",t_yesno:"⭕ Yes/No",t_custom:"✏️ My own",
+ n_lunch:"Today's lunch",n_weekend:"How to spend the day off",n_movie:"Movie genre to watch",n_snack:"Today's snack",n_outfit:"Today's outfit",n_yesno:"Yes? No?",n_custom:"Your own roulette"
+}};
+const TPL={
+ lunch:[["カレー","Curry"],["ラーメン","Ramen"],["寿司","Sushi"],["パスタ","Pasta"],["丼もの","Rice bowl"],["定食","Set meal"]],
+ weekend:[["映画を見る","Watch a movie"],["散歩","Take a walk"],["カフェ","Go to a café"],["家でゴロゴロ","Relax at home"],["そうじ","Clean up"],["友だちに会う","Meet a friend"]],
+ movie:[["コメディ","Comedy"],["アクション","Action"],["アニメ","Anime"],["ホラー","Horror"],["恋愛","Romance"],["SF","Sci-fi"]],
+ snack:[["チョコ","Chocolate"],["アイス","Ice cream"],["クッキー","Cookies"],["フルーツ","Fruit"],["せんべい","Rice cracker"]],
+ outfit:[["白T","White tee"],["パーカー","Hoodie"],["シャツ","Shirt"],["ワンピース","Dress"],["ジャケット","Jacket"]],
+ yesno:[["はい！","Yes!"],["いいえ","No"]],
+ custom:[["Aさん","Option A"],["Bさん","Option B"],["Cさん","Option C"]]
+};
+const COLORS=["#ff6f91","#ffc75f","#6bd6a8","#5ec2ff","#b28dff","#ff9671","#8be36b"];
+const ORDER=["lunch","weekend","movie","snack","outfit","yesno","custom"];
+let lang="en",tpl="lunch",items=[],hist=[],rot=0,spinning=false,last=null,msgKey=null,timer=null;
+const $=id=>document.getElementById(id);
+const t=k=>I18N[lang][k]||k;
+const pick=o=>lang==="ja"?o.ja:o.en;
+function tplItems(id){return TPL[id].map(a=>({ja:a[0],en:a[1]}))}
+function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(){store("spinpop",JSON.stringify({tpl,items,hist}))}
+function initLang(){
+  let l=null;
+  if(window.APP_LANG==="ja"||window.APP_LANG==="en")l=window.APP_LANG;
+  if(!l){try{const q=new URLSearchParams(location.search).get("lang");if(q==="ja"||q==="en")l=q}catch(e){}}
+  if(!l){const s=load("lang");if(s==="ja"||s==="en")l=s}
+  return l||"en";
+}
+function loadState(){
+  try{
+    const s=JSON.parse(load("spinpop")||"null");
+    if(s&&TPL[s.tpl]&&Array.isArray(s.items)&&s.items.length>=2&&s.items.every(x=>x&&typeof x.ja==="string"&&typeof x.en==="string")){tpl=s.tpl;items=s.items.slice(0,12);hist=Array.isArray(s.hist)?s.hist.slice(0,8):[];return}
+  }catch(e){}
+  items=tplItems(tpl);
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function fit(s,n){
+  let fs=n<=6?15:n<=9?13:11;
+  const w=(str,f)=>[...str].reduce((a,c)=>a+(c.charCodeAt(0)<256?.58:1)*f,0);
+  const max=86;
+  while(w(s,fs)>max&&fs>9)fs--;
+  let out=s;
+  if(w(out,fs)>max){const a=[...s];while(a.length>1&&w(a.join("")+"…",fs)>max)a.pop();out=a.join("")+"…"}
+  return {text:out,fs};
+}
+function pt(r,deg){const a=deg*Math.PI/180;return [150+r*Math.sin(a),150-r*Math.cos(a)]}
+function renderWheel(resetRot){
+  const n=items.length,a=360/n,g=$("wheelG");
+  let h="";
+  for(let i=0;i<n;i++){
+    let c=COLORS[i%COLORS.length];
+    if(i===n-1&&i%COLORS.length===0)c=COLORS[2];
+    const p1=pt(146,i*a),p2=pt(146,(i+1)*a),big=a>180?1:0;
+    h+=`<path d="M150 150L${p1[0].toFixed(2)} ${p1[1].toFixed(2)}A146 146 0 ${big} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}Z" fill="${c}" stroke="#fff" stroke-width="3"/>`;
+    const f=fit(pick(items[i]),n),mid=i*a+a/2;
+    h+=`<text x="198" y="150" transform="rotate(${(mid-90).toFixed(2)} 150 150)" font-size="${f.fs}" font-weight="800" fill="#3b1a33" dominant-baseline="central">${esc(f.text)}</text>`;
+  }
+  if(n===1)h=`<circle cx="150" cy="150" r="146" fill="${COLORS[0]}"/>`;
+  g.innerHTML=h;
+  if(resetRot)rot=0;
+  g.style.transition="none";g.style.transform=`rotate(${rot}deg)`;
+}
+function renderTabs(){
+  $("tabs").innerHTML=ORDER.map(id=>`<button type="button" class="tab" data-tpl="${id}" data-demo="tab-${id}" aria-pressed="${id===tpl}">${esc(t("t_"+id))}</button>`).join("");
+  $("tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{if(spinning)return;tpl=b.dataset.tpl;items=tplItems(tpl);last=null;msgKey=null;renderAll(true);save()});
+}
+function renderChips(){
+  $("chips").innerHTML=items.map((it,i)=>`<span class="chip">${esc(pick(it))}<button type="button" data-i="${i}" data-demo="remove-option" aria-label="${esc(pick(it)+t("remove"))}">✕</button></span>`).join("");
+  $("chips").querySelectorAll("button").forEach(b=>b.onclick=()=>removeItem(+b.dataset.i));
+}
+function renderResult(){
+  const r=$("result");
+  if(last){r.innerHTML=`<div class="lbl">${t("resultLbl")}</div><div class="win">${esc(pick(last))}</div>`}
+  else r.innerHTML=`<div class="lbl">${t("resultEmpty")}</div>`;
+}
+function renderHist(){
+  const ul=$("hist");
+  if(!hist.length){ul.innerHTML=`<li class="empty" style="background:none;padding:0">${t("noHist")}</li>`;return}
+  ul.innerHTML=hist.map(h=>`<li><b>${esc(pick(h))}</b><span>${esc(lang==="ja"?h.tp_ja:h.tp_en)}</span></li>`).join("");
+}
+function renderMsg(){$("msg").textContent=msgKey?t(msgKey):""}
+function setMsg(k){msgKey=k;renderMsg();clearTimeout(timer);if(k)timer=setTimeout(()=>{msgKey=null;renderMsg()},2200)}
+function renderAll(resetRot){
+  renderTabs();renderChips();renderWheel(resetRot);renderResult();renderHist();renderMsg();
+  $("tplName").textContent=t("n_"+tpl);
+  $("wheelSvg").setAttribute("aria-label",t("wheelAria"));
+}
+function applyLang(){
+  document.documentElement.lang=lang;document.title=t("title");
+  document.querySelectorAll("[data-i18n]").forEach(e=>{
+    if(e.id==="spinBtn"||e.id==="hub")return;e.textContent=t(e.dataset.i18n)});
+  document.querySelectorAll("[data-i18n-ph]").forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+  document.querySelectorAll("[data-i18n-aria]").forEach(e=>e.setAttribute("aria-label",t(e.dataset.i18nAria)));
+  $("spinBtn").textContent=spinning?t("spinning"):t("spin");
+  $("hub").textContent=t("go");
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
+  renderAll(false);
+}
+function setLang(l){lang=l;store("lang",l);applyLang()}
+function removeItem(i){
+  if(spinning)return;
+  if(items.length<=2){setMsg("min");return}
+  items.splice(i,1);last=null;setMsg("removed");renderAll(true);save();
+}
+$("addForm").onsubmit=e=>{
+  e.preventDefault();if(spinning)return;
+  const v=$("addInput").value.trim();
+  if(!v){setMsg("blank");return}
+  if(items.length>=12){setMsg("max");return}
+  if(items.some(x=>x.ja===v||x.en===v)){setMsg("dup");return}
+  items.push({ja:v,en:v});$("addInput").value="";last=null;setMsg("added");renderAll(true);save();
+};
+$("resetBtn").onclick=()=>{if(spinning)return;items=tplItems(tpl);last=null;setMsg("resetDone");renderAll(true);save()};
+$("clearHist").onclick=()=>{hist=[];renderHist();save()};
+function confetti(){
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const em=["🎉","✨","🎊","⭐","💖","🍬"];
+  for(let i=0;i<26;i++){
+    const s=document.createElement("span");s.className="conf";s.textContent=em[i%em.length];
+    s.style.left=(Math.random()*96)+"vw";s.style.animationDuration=(1.6+Math.random()*1.6)+"s";s.style.animationDelay=(Math.random()*.4)+"s";
+    document.body.appendChild(s);setTimeout(()=>s.remove(),3800);
+  }
+}
+function spin(){
+  if(spinning||items.length<2)return;
+  spinning=true;last=null;renderResult();
+  $("spinBtn").disabled=true;$("hub").disabled=true;$("spinBtn").textContent=t("spinning");
+  const n=items.length,a=360/n,w=Math.floor(Math.random()*n);
+  const off=(Math.random()-.5)*a*.7,mid=w*a+a/2+off;
+  const cur=((rot%360)+360)%360,target=((360-mid)%360+360)%360;
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dur=reduce?900:4600;
+  rot+=360*(reduce?1:6)+((target-cur)+360)%360;
+  const g=$("wheelG");
+  void g.getBoundingClientRect();
+  g.style.transition=`transform ${dur}ms cubic-bezier(.12,.6,.1,1)`;
+  g.style.transform=`rotate(${rot}deg)`;
+  setTimeout(()=>{
+    spinning=false;last=items[w];
+    hist.unshift({ja:last.ja,en:last.en,tp_ja:I18N.ja["n_"+tpl],tp_en:I18N.en["n_"+tpl]});
+    hist=hist.slice(0,6);
+    $("spinBtn").disabled=false;$("hub").disabled=false;$("spinBtn").textContent=t("spin");
+    renderResult();renderHist();save();confetti();
+  },dur+120);
+}
+$("spinBtn").onclick=spin;$("hub").onclick=spin;
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+lang=initLang();loadState();applyLang();
+</script>
+</body>
+</html>
